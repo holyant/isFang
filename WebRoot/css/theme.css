@@ -1,0 +1,21 @@
+body, div, h1, form, fieldset, input, textarea {
+     margin: 0;
+     padding: 0;
+     border: 0;
+     outline: none;
+ }
+ html {
+     height: 100%;
+ }
+ body {
+     font-family:"Microsoft Yahei" !important;
+     margin-bottom:20px;
+     padding-bottom:40px;
+ }
+ #footer{
+	width:1000px; 
+	height:30px;
+	position:absolute;
+	bottom:0; 
+	overflow:hidden;
+}

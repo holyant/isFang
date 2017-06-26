@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="userSQL">
+	<typeAlias alias="User" type="model.User"/>
+	
+	<select id="getUserById" resultClass="User" parameterClass="String">
+		<![CDATA[
+			select 
+				id,
+				staff_id as staffId,
+				pwd,
+				login_date as loginDate
+			from User_user
+			where 1=1
+			and id = #id#
+		]]> 
+	</select>
+	
+	<select id="getUserByStaffId" resultClass="User" parameterClass="String">
+		<![CDATA[
+			select 
+				id,
+				staff_id as staffId,
+				pwd,
+				login_date as loginDate
+			from User_user
+			where 1=1
+			and staff_id = #staffId#
+		]]> 
+	</select>
+	
+	<insert id="addUser" parameterClass="User">
+		insert into User_user(staff_id,pwd,login_date)
+		values(#staffId#,"pwd",#loginDate#)
+	</insert>
+	
+	<update id="changePw" parameterClass="User">
+		update User_user set 
+			pwd = #pwd#
+		where id=#id#
+	</update>
+	
+	<delete id="delUser" parameterClass="String">
+		delete from User_user where staff_id=#staffId#
+	</delete>
+</sqlMap>

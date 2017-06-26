@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="proManageSQL">
+	<typeAlias alias="Product" type="model.Product"/>
+	<typeAlias alias="Pager" type="util.Pager"/>
+	<typeAlias alias="Query" type="model.ProductQuery"/>
+	<typeAlias alias="Label" type="model.Label"/>
+	<sql id="where_clause">
+		<isNotEmpty property="label" prepend="and">
+			A.label = #label#	
+		</isNotEmpty>
+		<isNotEmpty property="id" prepend="and">
+			A.id = #id#	
+		</isNotEmpty>
+	</sql>
+	
+	<select id="getProInfos" resultClass="Product" parameterClass="Query">
+		<![CDATA[
+			select 
+				A.id,
+				B.label As label,
+				no,
+				name,
+				size,
+				unit,
+				cost,
+				memo
+			from product A
+			left join label  B on  A.label = B.id
+			where 1=1
+		]]> 
+		<include refid="where_clause"/>
+	</select>
+	<insert id="addPro" parameterClass="Product">
+		insert into product(label,no,name,size,unit,cost,memo)
+		values(#label#,#no#,#name#,#size#,#unit#,#cost#,#memo#);
+	</insert>
+	
+	<update id="editPro">
+		update product set 
+		<isNotEmpty property="label">
+			label = #label#,
+		</isNotEmpty>
+		<isNotEmpty property="no">
+			no = #no#,
+		</isNotEmpty>	
+		<isNotEmpty property="name">
+			name = #name#,
+		</isNotEmpty>			
+		<isNotEmpty property="unit">
+			unit = #unit#,
+		</isNotEmpty>			
+		<isNotEmpty property="cost">
+			cost = #cost#,
+		</isNotEmpty>		
+			size = #size#,	
+			memo = #memo#
+		where id=#id#
+	</update>
+	
+	<delete id="delPro">
+		delete from product where id=#id#
+	</delete>
+	
+	<select id="getLabels" resultClass="Label">
+		select 
+			id,
+			label 
+		from label
+		order by id 
+	</select>
+	
+	<delete id="deleteProductById" parameterClass="String">
+		delete from product where id=#id#
+	</delete>
+</sqlMap>

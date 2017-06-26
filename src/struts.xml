@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+
+	<constant name="struts.locale" value="zh_CN"></constant>
+	<constant name="struts.devMode" value="true"></constant>
+	
+	<package name="default" extends="struts-default">
+		<interceptors>
+			<interceptor name="validateUser" class="web.interceptor.CheckLoginInterceptor"></interceptor>
+			<interceptor-stack name="loginStack">
+				<interceptor-ref name="defaultStack"></interceptor-ref>
+				<interceptor-ref name="validateUser"></interceptor-ref>
+			</interceptor-stack>
+		</interceptors>
+		
+		<default-interceptor-ref name="loginStack"></default-interceptor-ref>
+		<default-action-ref name="login">/login.jsp</default-action-ref>
+
+		<global-results>  
+            <result name="loginFrame">/login.jsp</result>  
+		</global-results>
+		<action name="login" class="web.action.LoginAction">
+			<result name="success" type="redirect">/orderManage!init</result>
+		</action>
+		<action name="proManage" class="web.action.ProManageAction">
+			<result name="search">/proManage/prodMain.jsp</result>
+			<result name="list">/proManage/prodList.jsp</result>
+			<result name="modifyFrame">/proManage/productUpdate.jsp</result>
+			<result name="add">/proManage/productAdd.jsp</result>
+			<result name="init" type="redirect">/proManage!init</result>
+		</action>
+		<action name="proList" class="web.action.ProManageAction" method="showProducts">
+			<result>/proManage/prodList.jsp</result>
+		</action>
+		<action name="orderManage" class="web.action.OrderManageAction">
+			<result name="init">/orderManage/orderCreate.jsp</result>
+			<result name="searchFrame">/orderManage/orderMain.jsp</result>
+			<result name="orderList">/orderManage/orderList.jsp</result>
+		</action>
+		
+		<action name="orderList" class="web.action.OrderManageAction">
+			<result name="orderList">/orderManage/orderList.jsp</result>
+		</action>
+		
+		<action name="shopManage" class="web.action.ShopManageAction">
+			<result name="add">/shopManage/shopAdd.jsp</result>
+			<result>/shopManage/shopMain.jsp</result>
+			<result name="modifyFrame">/shopManage/shopUpdate.jsp</result>
+			<result name="search" type="redirect">shopManage!init</result>
+		</action>
+		
+		<action name="hello" class="web.action.HelloAction">
+			<result name="success" type="redirect">/orderManage!init</result>
+		</action>
+		
+		<action name="weixin" class="web.action.WeiXinAction">
+			<result name="success" type="redirect">/orderManage!init</result>
+		</action>
+	</package>
+</struts>

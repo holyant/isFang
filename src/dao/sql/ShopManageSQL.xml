@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="shopManageSQL">
+	<typeAlias alias="Shop" type="model.Shop"/>
+	<typeAlias alias="ShopQuery" type="model.ShopQuery"/>
+	<sql id="where_clause">
+		<isNotEmpty property="id" prepend="and">
+			A.id=#id#
+		</isNotEmpty>
+	</sql>
+	<select id="getShops" resultClass="Shop" parameterClass="ShopQuery">
+		<![CDATA[
+			select 
+				A.id,
+				person,
+				name,
+				phone,
+				addr,
+				memo
+			from shop A
+			where 1=1
+		]]> 
+		<include refid="where_clause"/>
+	</select>
+	
+	<insert id="addShop" parameterClass="Shop">
+		insert into shop(name,person,phone,addr,memo)
+		values(#name#,#person#,#phone#,#addr#,#memo#)
+	</insert>
+	
+	<update id="updateShop" parameterClass="Shop">
+		update shop 
+			set name=#name#,
+			person=#person#,
+			phone=#phone#,
+			addr=#addr#,
+			memo=#memo#
+		where id=#id#
+	</update>
+	
+	<delete id="deleteShop" parameterClass="ShopQuery">
+		delete from shop
+		where id=#id#
+	</delete>
+</sqlMap>

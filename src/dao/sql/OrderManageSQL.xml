@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="orderManageSQL">
+	<typeAlias alias="Shop" type="model.Shop"/>
+	<typeAlias alias="SaleProduct" type="model.SaleProduct"/>
+	<typeAlias alias="Product" type="model.Product"/>
+	<typeAlias alias="SaleOrderInfo" type="model.vo.SaleOrderInfo"/>
+	<typeAlias alias="SaleOrderQuery" type="model.SaleOrderQuery"/>
+	<typeAlias alias="SaleOrder" type="model.SaleOrder"/>
+	
+	<resultMap class="SaleOrder" id="SaleOrderResult">
+		<result property="id" column="id"/>
+		<result property="serial" column="serial"/>
+		<result property="shopId" column="shopId"/>
+		<result property="shopName" column="shopName"/>
+		<result property="createTime" column="createTime"/>
+		<result property="memo" column="memo"/>
+		<result property="saleProducts" column="serial" select="orderManageSQL.getSaleProductsById"/>
+	</resultMap>
+	
+	<resultMap class="SaleProduct" id="SaleProductResult">
+		<result property="id" column="id"/>
+		<result property="serial" column="serial"/>
+		<result property="proId" column="proId"/>
+		<result property="amount" column="amount"/>
+		<result property="memo" column="memo"/>
+		<result property="saleOrder" column="serial" select="orderManageSQL.getSaleOrderById"/>
+	</resultMap>
+	
+	<select id="selectSaleOrders" resultMap="SaleOrderResult" parameterClass="SaleOrderQuery">
+		<![CDATA[   
+		   select a.id,a.serial,a.shopId,a.createTime,a.memo,b.name shopName  from saleorder a
+			left join shop b on a.shopid = b.id
+			where 1=1
+		  ]]> 
+		  <isNotEmpty property="shopId">
+			<isNotEqual property="shopId" compareValue="999">
+				and a.shopId = #shopId#
+			</isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty property="statCycleStart">
+			<![CDATA[
+			and a.createTime>=#statCycleStart#]]> 
+		</isNotEmpty>
+		<isNotEmpty property="statCycleEnd">
+			<![CDATA[
+			and a.createTime<=DATE_ADD(#statCycleEnd#,INTERVAL 1 DAY)]]> 
+		</isNotEmpty>
+		ORDER BY a.serial desc
+			limit #start#,10  
+	</select>
+	
+	<select id="getSaleProductsById" parameterClass="String" resultClass="SaleProduct" remapResults="true">
+		<![CDATA[   
+		    select a.id id,a.serial serial,a.proid proId,b.name proName,a.amount amount,a.memo memo,a.amount*b.cost price from saleproduct a
+				left join product b  on a.proid = b.id
+			 where serial = #value#
+		  ]]>   
+	</select>
+	
+	<select id="getSaleOrderById" parameterClass="String" resultClass="SaleOrder">
+		<![CDATA[   
+		   select id,serial,proid,amount,memo from saleorder where serial = #value#
+		  ]]>   
+	</select>
+	
+	<sql id="where_clause">
+		<isNotEmpty property="attribute" prepend="and">
+			A.name like %#attribute$#
+		</isNotEmpty>
+	</sql>
+	<select id="getClients" resultClass="Shop" parameterClass="java.lang.String">
+		<![CDATA[
+			select 
+				A.id,
+				person,
+				name,
+				phone,
+				addr,
+				memo
+			from shop A
+			where 1=1
+		]]> 
+	</select>
+	
+	<select id="getSerial" resultClass="java.lang.String" >
+		<![CDATA[
+			select serial from saleOrder where serial like date_format(now(),'%Y%m%') order by serial desc limit 0,1
+		]]> 
+	</select>
+	<insert id="saveSaleOrder">
+		<![CDATA[
+			insert into SaleOrder(serial,shopId,createTime)
+			 values(#serial#,#shopId#,#createTime#)
+		]]> 
+	</insert>
+	<insert id="saveSalePro" parameterClass="SaleProduct">
+		<![CDATA[
+			insert into SaleProduct(serial,proId,amount)
+			 values(#serial#,#proId#,#amount#)
+		]]> 
+	</insert>
+	<select id="getProduct" resultClass="Product" parameterClass="java.lang.Integer">
+		select id,label,no,name,size,unit,cost,memo from product
+		where id=#id#
+	</select>
+	<select id="getShop" resultClass="Shop" parameterClass="java.lang.Integer">
+		select id,name,person,phone,memo,addr
+		from shop where id=#shopId#
+	</select>
+	
+	<select id="getLabelName" parameterClass="java.lang.String" resultClass="java.lang.String">
+		select label from label where id= #label#
+	</select>
+	
+	<select id="showOrders" parameterClass="SaleOrderQuery" resultClass="SaleOrderInfo">
+		select 
+			a.serial,
+			createtime AS createTime,
+			amount,
+			prodno AS prodNo,
+			prodname AS prodName,
+			price,
+			c.name shopName 
+		from saleorder a 
+		left join (select serial,amount,no prodno,name prodname,amount*cost price from saleproduct a left join product b on a.proid = b.id) b on a.serial = b.serial
+		left join shop c on a.shopid = c.id
+		where 1=1 and a.serial !=-1
+		<isNotEmpty property="shopId">
+			<isNotEqual property="shopId" compareValue="999">
+				and a.shopId = #shopId#
+			</isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty property="statCycleStart">
+			<![CDATA[
+			and a.createTime>=#statCycleStart#]]> 
+		</isNotEmpty>
+		<isNotEmpty property="statCycleEnd">
+			<![CDATA[
+			and a.createTime<=DATE_ADD(#statCycleEnd#,INTERVAL 1 DAY)]]> 
+		</isNotEmpty>
+		ORDER BY serial desc
+			limit #start#,10
+		
+	</select>
+	<delete id="deleteOrder" parameterClass="SaleOrderQuery" >
+		delete from saleorder where serial = #serial#
+	</delete>
+	
+	<delete id="deleteOrderProduct" parameterClass="SaleOrderQuery" >
+		delete from saleproduct where serial = #serial#
+	</delete>
+	
+	<select id="getTotalOrderNum" parameterClass="SaleOrderQuery" resultClass="Integer">
+		select 
+			count(1)
+		from saleorder a 
+		left join (select serial,amount,no prodno,name prodname,amount*cost price from saleproduct a left join product b on a.proid = b.id) b on a.serial = b.serial
+		left join shop c on a.shopid = c.id
+		where 1=1 and a.serial !=-1
+		<isNotEmpty property="shopId">
+			<isNotEqual property="shopId" compareValue="999">
+				and a.shopId = #shopId#
+			</isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty property="statCycleStart">
+			<![CDATA[
+			and a.createTime>=#statCycleStart#]]> 
+		</isNotEmpty>
+		<isNotEmpty property="statCycleEnd">
+			<![CDATA[
+			and a.createTime<=DATE_ADD(#statCycleEnd#,INTERVAL 1 DAY)]]> 
+		</isNotEmpty>
+	</select>
+</sqlMap>
